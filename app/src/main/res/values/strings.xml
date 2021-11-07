@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">WeatherApp</string>
+    <string name="weather_image_type">weather image type</string>
+    <string name="add_button">Add</string>
+    <string name="hint_city">City name</string>
+    <string name="input_city">Enter city</string>
 </resources>

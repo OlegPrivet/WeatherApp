@@ -9,71 +9,76 @@ import com.google.gson.annotations.SerializedName
  **/
 
 data class WeatherResponse(
-    val coord: CoordItem,
-    val weathers: List<WeatherItem>,
-    val base: String,
-    val main: MainItem,
-    val visibility: Long,
-    val wind: WindItem,
-    val clouds: CloudsItem,
-    val dt: Long,
-    val sys: SysItem,
-    val timezone: Long,
-    val id: Int,
-    val name: String,
-    val cod: Int
+    @SerializedName("lat")
+    val lat: Float,
+    @SerializedName("lon")
+    val lon: Float,
+    @SerializedName("current")
+    val current: Current,
+    @SerializedName("daily")
+    val daily: List<Daily>,
 )
 
-data class SysItem (
-    @SerializedName("type")
-    val type: Int,
-    @SerializedName("id")
-    val id: Int,
-    @SerializedName("message")
-    val message: Float,
-    @SerializedName("country")
-    val country: String,
+data class Current(
+    @SerializedName("dt")
+    val dt: Long,
     @SerializedName("sunrise")
     val sunrise: Long,
     @SerializedName("sunset")
-    val sunset: Long
-)
-
-data class CloudsItem (
-    @SerializedName("all")
-    val all: Int,
-)
-
-data class WindItem(
-    @SerializedName("speed")
-    val speed: Float,
-    @SerializedName("deg")
-    val deg: Float,
-)
-
-data class MainItem(
+    val sunset: Long,
     @SerializedName("temp")
     val temp: Float,
     @SerializedName("feels_like")
     val feels_like: Float,
-    @SerializedName("temp_min")
-    val temp_min: Float,
-    @SerializedName("temp_max")
-    val temp_max: Float,
     @SerializedName("pressure")
     val pressure: Int,
     @SerializedName("humidity")
-    val humidity: Int
+    val humidity: Int,
+    @SerializedName("visibility")
+    val visibility: Long,
+    @SerializedName("wind_speed")
+    val wind_speed: Float,
+    @SerializedName("wind_deg")
+    val wind_deg: Int,
+    @SerializedName("weather")
+    val weather: List<Weather>,
 )
 
-data class CoordItem(
-    @SerializedName("lon")
-    val lon: Float,
-    @SerializedName("lat")
-    val lat: Float
+data class Daily(
+    @SerializedName("dt")
+    val dt: Long,
+    @SerializedName("sunrise")
+    val sunrise: Long,
+    @SerializedName("sunset")
+    val sunset: Long,
+    @SerializedName("moonrise")
+    val moonrise: Long,
+    @SerializedName("moonset")
+    val moonset: Long,
+    @SerializedName("temp")
+    val temp: Temp,
+    @SerializedName("pressure")
+    val pressure: Int,
+    @SerializedName("humidity")
+    val humidity: Int,
+    @SerializedName("wind_speed")
+    val wind_speed: Float,
+    @SerializedName("wind_deg")
+    val wind_deg: Int,
+    @SerializedName("weather")
+    val weather: List<Weather>,
 )
 
-data class WeatherItem(
+
+
+data class Temp(
+    @SerializedName("day")
+    val day: Float,
+    @SerializedName("night")
+    val night: Float
+)
+
+data class Weather(
     @SerializedName("id")
     val id: Int,
     @SerializedName("main")
