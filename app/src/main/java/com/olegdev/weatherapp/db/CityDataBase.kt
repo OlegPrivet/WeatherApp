@@ -10,6 +10,8 @@ import com.olegdev.weatherapp.models.CityModel
  * @Email: karandalli35@gmail.com
  **/
 @Database(entities = [CityModel::class], version = 1)
-abstract class CityDataBase : RoomDatabase() {
+abstract class CityDataBase: RoomDatabase() {
+
     abstract fun cityDao(): CityDao
 }
+

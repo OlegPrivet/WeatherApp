@@ -1,38 +1,35 @@
-package com.olegdev.weatherapp.presenters.detail
+package com.olegdev.weatherapp.ui.citydetail.presenter
 
 import android.util.Log
 import com.olegdev.weatherapp.repositories.WeatherRepository
-import com.olegdev.weatherapp.ui.DetailView
+import com.olegdev.weatherapp.ui.base.presenter.BasePresenter
+import com.olegdev.weatherapp.ui.citydetail.view.DetailMVPView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.lang.ref.WeakReference
+import javax.inject.Inject
 
 /**Created by Oleg
  * @Date: 05.11.2021
  * @Email: karandalli35@gmail.com
  **/
-class DetailPresenterImpl : DetailPresenter {
 
-    private val TAG = DetailPresenterImpl::class.simpleName
+class DetailPresenter<V : DetailMVPView>  @Inject constructor(private val weatherRepository: WeatherRepository):
+    BasePresenter<V>(), DetailMVPPresenter<V> {
 
-    private val weatherRepository = WeatherRepository.get()
-    private var viewState: WeakReference<DetailView>? = null
+    private val TAG = DetailPresenter::class.simpleName
+
     private val compositeDisposable = CompositeDisposable()
 
-    fun attachView(detailView: DetailView) {
-        viewState = WeakReference(detailView)
-    }
-
-    fun detachView() {
-        viewState = null
+    override fun onDetach() {
         compositeDisposable.dispose()
+        super.onDetach()
     }
 
     override fun fetchDirect(
         city: String,
     ) {
-        viewState?.get()?.loadWeather()
+        getView()?.loadWeather()
         compositeDisposable.add(
             weatherRepository.weatherApi.getDirect(q = city)
                 .subscribeOn(Schedulers.io())
@@ -53,13 +50,10 @@ class DetailPresenterImpl : DetailPresenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe ({
-                    viewState?.get()?.showWeather(it)
+                    getView()?.showWeather(it)
                 },{
-                    viewState?.get()?.loadError("Error: ${it.localizedMessage}")
+                    getView()?.loadError("Error: ${it.localizedMessage}")
                 })
-
         )
     }
-
-
 }

@@ -1,13 +1,15 @@
-package com.olegdev.weatherapp.fragments
+package com.olegdev.weatherapp.ui.citieslist.view
 
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
@@ -17,18 +19,22 @@ import com.olegdev.weatherapp.R
 import com.olegdev.weatherapp.adapters.ListCitiesAdapter
 import com.olegdev.weatherapp.adapters.baseadapter.BaseAdapterCallback
 import com.olegdev.weatherapp.models.CityModel
-import com.olegdev.weatherapp.presenters.list.ListPresenterImpl
-import com.olegdev.weatherapp.ui.ListView
+import com.olegdev.weatherapp.ui.base.view.BaseFragment
+import com.olegdev.weatherapp.ui.citieslist.presenter.ListMVPPresenter
+import com.olegdev.weatherapp.ui.citydetail.view.DetailFragment
+import javax.inject.Inject
 
 /**Created by Oleg
  * @Date: 06.11.2021
  * @Email: karandalli35@gmail.com
  **/
-class ListCitiesFragment : Fragment(R.layout.fragment_list_cities), ListView {
+class ListCitiesFragment : BaseFragment(), ListMVPView {
 
-    private val TAG = ListCitiesFragment::class.simpleName
+    val TAG = ListCitiesFragment::class.simpleName
 
     companion object {
+
+        val TAG = ListCitiesFragment::class.simpleName
         fun getNewInstance(): ListCitiesFragment {
             return ListCitiesFragment()
         }
@@ -36,30 +42,40 @@ class ListCitiesFragment : Fragment(R.layout.fragment_list_cities), ListView {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var citiesAdapter: ListCitiesAdapter
-    private var listPresenter = ListPresenterImpl()
+
+    @Inject
+    internal lateinit var presenter: ListMVPPresenter<ListMVPView>
 
     private lateinit var progressBar: ProgressBar
     private lateinit var fab: FloatingActionButton
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        listPresenter.attachView(this@ListCitiesFragment)
-    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = inflater.inflate(R.layout.fragment_list_cities, container, false)
 
     @SuppressLint("CheckResult")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        presenter.onAttach(this@ListCitiesFragment)
         super.onViewCreated(view, savedInstanceState)
-        progressBar = view.findViewById(R.id.progress)
-        fab = view.findViewById(R.id.add_city)
-        recyclerView = view.findViewById(R.id.recycler_list_cities)
+    }
+
+    override fun setUp() {
+        progressBar = view?.findViewById(R.id.progress) as ProgressBar
+        fab = view?.findViewById(R.id.add_city) as FloatingActionButton
+        recyclerView = view?.findViewById(R.id.recycler_list_cities) as RecyclerView
         citiesAdapter = ListCitiesAdapter()
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.adapter = citiesAdapter
         citiesAdapter.attachCallback(object : BaseAdapterCallback<CityModel> {
             override fun onItemClick(model: CityModel, view: View) {
                 requireActivity().supportFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    setCustomAnimations(R.anim.slide_left, R.anim.slide_right)
                     replace(R.id.fragment_container, DetailFragment.getNewInstance(model.city))
-                    addToBackStack("detail")
+                    addToBackStack(null)
                 }
             }
 
@@ -77,13 +93,13 @@ class ListCitiesFragment : Fragment(R.layout.fragment_list_cities), ListView {
                         hintRes = R.string.hint_city,
                         inputType = InputType.TYPE_CLASS_TEXT
                     ) { dialog, text ->
-                        listPresenter.saveCity(cityModel = CityModel(city = text.toString()))
+                        presenter.saveCity(cityModel = CityModel(city = text.toString()))
                         dialog.dismiss()
                     }
                     positiveButton(R.string.add_button)
                 }
         }
-        listPresenter.getListCities()
+        presenter.getListCities()
     }
 
     override fun loadCities() {
@@ -100,9 +116,9 @@ class ListCitiesFragment : Fragment(R.layout.fragment_list_cities), ListView {
         Log.e(TAG, error)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        listPresenter.detachView()
+    override fun onDestroyView() {
+        presenter.onDetach()
+        super.onDestroyView()
     }
 
 }
